@@ -54,7 +54,7 @@ def take_admin_snapshot() -> Path:
 
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
-        page = browser.new_page(viewport={"width": 1280, "height": 900})
+        page = browser.new_page(viewport={"width": 1440, "height": 900})
 
         page.goto(ADMIN_USERS_URL, wait_until="networkidle", timeout=60_000)
         page.wait_for_selector("#email", timeout=30_000)
@@ -65,12 +65,42 @@ def take_admin_snapshot() -> Path:
 
         page.wait_for_url("**/admin/users**", timeout=30_000)
         page.wait_for_load_state("networkidle")
-        page.wait_for_timeout(2000)
+        page.wait_for_timeout(2500)
 
-        page.evaluate("window.scrollBy(0, 1500)")
-        page.wait_for_timeout(800)
+        # Stats only: top of page through ATTEMPTS (hide user table below)
+        page.evaluate("window.scrollTo(0, 0)")
+        page.set_viewport_size({"width": 1440, "height": 1400})
+        page.wait_for_timeout(500)
 
-        page.screenshot(path=str(screenshot_path), full_page=False)
+        page.evaluate("""
+            () => {
+                const table = document.querySelector("table");
+                if (table) table.style.display = "none";
+            }
+        """)
+
+        clip_height = page.evaluate("""
+            () => {
+                const filterBtn = [...document.querySelectorAll("button")]
+                    .find((b) => b.textContent?.includes("All pass status"));
+                if (filterBtn) {
+                    let node = filterBtn.parentElement;
+                    for (let i = 0; i < 4; i++) {
+                        const rect = node.getBoundingClientRect();
+                        if (rect.height > 30 && rect.height < 120) {
+                            return Math.ceil(rect.bottom + 12);
+                        }
+                        node = node.parentElement;
+                    }
+                }
+                return 1050;
+            }
+        """)
+
+        page.screenshot(
+            path=str(screenshot_path),
+            clip={"x": 0, "y": 0, "width": 1440, "height": clip_height},
+        )
         browser.close()
 
     return screenshot_path
