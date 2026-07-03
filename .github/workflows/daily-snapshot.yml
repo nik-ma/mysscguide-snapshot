@@ -1,9 +1,7 @@
 name: Daily Admin Snapshot
 
+# Triggered daily at 11:58 PM IST via cron-job.org (workflow_dispatch API)
 on:
-  schedule:
-    # 11:58 PM IST (UTC+5:30) = 18:28 UTC — before midnight reset
-    - cron: "28 18 * * *"
   workflow_dispatch:
 
 jobs:
