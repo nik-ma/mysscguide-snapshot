@@ -67,7 +67,7 @@ def take_admin_snapshot() -> Path:
         page.wait_for_load_state("networkidle")
         page.wait_for_timeout(2000)
 
-        page.evaluate("window.scrollBy(0, 1000)")
+        page.evaluate("window.scrollBy(0, 1500)")
         page.wait_for_timeout(800)
 
         page.screenshot(path=str(screenshot_path), full_page=False)
