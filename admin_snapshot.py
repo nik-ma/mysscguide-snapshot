@@ -5,12 +5,15 @@ import os
 import sys
 from datetime import datetime
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 import requests
 from dotenv import load_dotenv
 from playwright.sync_api import sync_playwright
 
 load_dotenv()
+
+IST = ZoneInfo("Asia/Kolkata")
 
 ADMIN_EMAIL = os.environ["ADMIN_EMAIL"]
 ADMIN_PASSWORD = os.environ["ADMIN_PASSWORD"]
@@ -46,7 +49,7 @@ def send_telegram_message(text: str) -> None:
 
 def take_admin_snapshot() -> Path:
     SCREENSHOT_DIR.mkdir(exist_ok=True)
-    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    timestamp = datetime.now(IST).strftime("%Y-%m-%d_%H-%M-%S")
     screenshot_path = SCREENSHOT_DIR / f"admin_users_{timestamp}.png"
 
     with sync_playwright() as p:
@@ -76,7 +79,8 @@ def take_admin_snapshot() -> Path:
 def main() -> int:
     try:
         screenshot = take_admin_snapshot()
-        caption = f"MySSCguide admin users — {datetime.now().strftime('%d %b %Y, %I:%M %p')}"
+        now = datetime.now(IST)
+        caption = f"MySSCguide admin users — {now.strftime('%d %b %Y, %I:%M %p')} IST"
         send_telegram_photo(screenshot, caption)
         print(f"Screenshot sent: {screenshot}")
         return 0
