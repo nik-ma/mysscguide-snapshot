@@ -2,8 +2,8 @@ name: Daily Admin Snapshot
 
 on:
   schedule:
-    # 11:55 PM IST (UTC+5:30) = 18:25 UTC
-    - cron: "25 18 * * *"
+    # 11:58 PM IST (UTC+5:30) = 18:28 UTC — before midnight reset
+    - cron: "28 18 * * *"
   workflow_dispatch:
 
 jobs:
@@ -19,6 +19,13 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: pip
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('requirements.txt') }}
 
       - name: Install dependencies
         run: |
